@@ -45,14 +45,21 @@ services:
     build: discovery/softwareService/software_server
     ports:
       - "3001:3001"
-    labels:
-      - "constraint:node==didoUbuntu"
 
   # Software database
   software_db:
     image: mongo:3
     volumes:
       - /data/db
+
+  webapp:
+    build: discovery/webapp/
+    ports:
+      - 80:80
+    volumes:
+      - /home/dido/github/DockerFinder/discovery/webapp:/code
+
+
 
 #####################################################
 ###############   STORAGE PHASE ####################
