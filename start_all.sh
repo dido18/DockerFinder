@@ -10,7 +10,7 @@
 NET="docker-finder"
 HUB_REPOSITORY=diunipisocc/docker-finder
 
-"${NODE_SCANNERS?Set Manger node:  $ export NODE_SCANNERS=<nodeofscanners>}"
+"${NODE_SCANNERS? Set Manager node:  $ export NODE_SCANNERS=<nodeofscanners>}"
 
 if [ -z "$NODE_SCANNERS" ]; then
     echo "not setted NODE_SCANNERS"
@@ -146,35 +146,3 @@ if [ $? -eq 0 ]
         echo "Could not create scanner service" >&2
         exit 1
 fi
-
-
-#Checker service
-docker service create  --network $NET  --name checker  \
-      --constraint  $CONSTRAINT_NODE \
-      --mount type=bind,source=/dockerfinder/checker/log,destination=/data/checker/log \
-       $HUB_REPOSITORY:checker run \
-       --interval=300 --path-logging=/data/checker/log/stats.log \
-       --images-url=http://images_server:3000/api/images/ \
-       --queue=images --key=images.scan \
-       --amqp-url=amqp://guest:guest@rabbitmq:5672    > /dev/null
-if [ $? -eq 0 ]
-    then
-        echo "Checker: service created"
-    else
-        echo "Could not create Checker service" >&2
-        exit 1
-fi
-
-#####################################################
-###############   MONITOR PHASE ####################
-#####################################################
-docker service create  --network $NET  -p 3002:3002 --name monitor \
-  --constraint  $CONSTRAINT_NODE \
-  $HUB_REPOSITORY:monitor > /dev/null
-  if [ $? -eq 0 ]
-      then
-          echo "monitor: service created"
-      else
-          echo "Could not create monitor service" >&2
-          exit 1
-  fi
